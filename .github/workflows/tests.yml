@@ -1,0 +1,26 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tracepath
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends iputils-tracepath
+      - name: Run tests as root, which adds the namespace lab with a 1300 byte hop
+        run: sudo python3 -m unittest discover -s tests -v
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests, with the loopback MTU set to 1300 through passwordless sudo for the low MTU check
+        env:
+          MTU_HUNTER_LO0_TEST: "1"
+        run: python3 -m unittest discover -s tests -v
